@@ -1,3 +1,8 @@
+from fastapi import FastAPI
 
 
-app = None
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return "I'm just a placeholder"
