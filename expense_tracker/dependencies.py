@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, create_engine, SQLModel
 
 from config import db_uri
 
@@ -16,3 +16,7 @@ def get_db_session():
 
 
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
+
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
