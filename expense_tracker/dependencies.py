@@ -6,8 +6,7 @@ from sqlmodel import Session, create_engine
 from config import db_uri
 
 
-connect_args = {"check_same_thread": False}
-engine = create_engine(db_uri(), connect_args=connect_args)
+engine = create_engine(db_uri())
 
 
 def get_db_session():
