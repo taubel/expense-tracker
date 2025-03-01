@@ -38,3 +38,16 @@ async def delete_expense(item_id: int, session: DBSessionDep):
         raise HTTPException(status_code=404, detail="Expense not found")
     session.delete(expense)
     session.commit()
+
+
+@router.put("/{item_id}", response_model=ExpensePublic)
+async def update_expense(item_id: int, expense: ExpenseCreate, session: DBSessionDep):
+    db_expense = session.get(Expense, item_id)
+    if not db_expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    data = expense.model_dump()
+    db_expense.sqlmodel_update(data)
+    session.add(db_expense)
+    session.commit()
+    session.refresh(db_expense)
+    return db_expense
