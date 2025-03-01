@@ -11,7 +11,7 @@ router = APIRouter(prefix="/expenses")
 # TODO add query parameters
 @router.get("/", response_model=list[ExpensePublic])
 async def get_all_expenses(session: DBSessionDep):
-    expenses = session.exec(select(Expense))
+    expenses = session.exec(select(Expense)).all()
     return expenses
 
 
