@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import select
 
 from ...dependencies import DBSessionDep
@@ -8,10 +8,9 @@ from .models import Expense, ExpenseCreate, ExpensePublic
 router = APIRouter(prefix="/expenses")
 
 
-# TODO add query parameters
 @router.get("/", response_model=list[ExpensePublic])
-async def get_all_expenses(session: DBSessionDep):
-    expenses = session.exec(select(Expense)).all()
+async def get_all_expenses(session: DBSessionDep, offset: int = 0, limit: int = Query(default=100, le=100)):
+    expenses = session.exec(select(Expense).offset(offset).limit(limit)).all()
     return expenses
 
 
