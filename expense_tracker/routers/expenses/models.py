@@ -10,7 +10,7 @@ class ExpenseBase(SQLModel):
 
 
 class Expense(ExpenseBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)  # TODO don't allow use to pass id
+    id: int | None = Field(default=None, primary_key=True)
 
 
 class ExpenseCreate(ExpenseBase):
