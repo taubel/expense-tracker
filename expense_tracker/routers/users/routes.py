@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
+from passlib.hash import sha512_crypt
 from sqlmodel import select
 
 from ...dependencies import DBSessionDep
@@ -9,8 +10,7 @@ router = APIRouter(prefix="/users")
 
 
 def hash_password(password: str) -> str:
-    # TODO add hashing
-    return password
+    return sha512_crypt.hash(password)
 
 
 @router.post("/", response_model=UserPublic)
