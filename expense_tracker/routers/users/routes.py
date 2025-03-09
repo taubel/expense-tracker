@@ -1,16 +1,11 @@
 from fastapi import APIRouter, HTTPException, Query
-from passlib.hash import sha512_crypt
 from sqlmodel import select
 
-from ...dependencies import DBSessionDep
+from ...dependencies import DBSessionDep, hash_password
 from .models import User, UserCreate, UserPublic
 
 
 router = APIRouter(prefix="/users")
-
-
-def hash_password(password: str) -> str:
-    return sha512_crypt.hash(password)
 
 
 @router.post("/", response_model=UserPublic)
