@@ -5,6 +5,7 @@ from sqlmodel.pool import StaticPool
 
 from expense_tracker import app
 from expense_tracker.dependencies import get_db_session
+from expense_tracker.routers.users.models import User
 
 
 @pytest.fixture(scope="function")
@@ -26,3 +27,14 @@ def client(session):
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def user(session: Session):
+    user = User(name="Tester", hashed_password="qwerty")
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    yield user
+    session.delete(user)
+    session.commit()
