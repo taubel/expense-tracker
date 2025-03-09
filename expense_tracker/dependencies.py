@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from passlib.hash import sha512_crypt
+from passlib.context import CryptContext
 from sqlmodel import Session, create_engine, SQLModel
 
 from config import db_uri
@@ -9,6 +9,7 @@ from config import db_uri
 
 connect_args = {"check_same_thread": False}
 engine = create_engine(db_uri(), connect_args=connect_args)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_db_session():
@@ -24,4 +25,4 @@ def create_db_and_tables():
 
 
 def hash_password(password: str) -> str:
-    return sha512_crypt.hash(password)
+    return pwd_context.hash(password)
