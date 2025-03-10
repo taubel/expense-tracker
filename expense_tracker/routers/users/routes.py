@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Form
+from fastapi.responses import RedirectResponse
 from sqlmodel import select
 
 from ...dependencies import DBSessionDep, hash_password
@@ -35,7 +36,7 @@ async def add_user_form(name: Annotated[str, Form()], password: Annotated[str, F
     session.add(user)
     session.commit()
     session.refresh(user)
-    return user
+    return RedirectResponse("/login", status_code=303)
 
 
 @router.get("/{item_id}", response_model=UserPublic)
