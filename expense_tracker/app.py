@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
+from jwt.exceptions import InvalidTokenError
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -53,6 +54,26 @@ def get_user_from_form(session: DBSessionDep, form_data: Annotated[OAuth2Passwor
     return user
 
 
+def get_user_from_token(session: DBSessionDep, token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except InvalidTokenError:
+        raise credentials_exception
+    user = session.exec(select(users.User).where(users.User.name == token_data.username)).first()
+    if not user:
+        raise credentials_exception
+    return user
+
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
@@ -76,5 +97,5 @@ async def login(
 
 
 @app.get("/")
-async def root():
-    return "I'm just a placeholder"
+async def root(user: Annotated[users.User, Depends(get_user_from_token)]):
+    return f"Hello {user.name}"
