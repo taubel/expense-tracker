@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Query, Form
 from sqlmodel import select
 
 from ...dependencies import DBSessionDep, hash_password
@@ -10,8 +12,25 @@ router = APIRouter(prefix="/users")
 
 @router.post("/", response_model=UserPublic)
 async def add_user(user: UserCreate, session: DBSessionDep):
+    existing_user = session.exec(select(User).where(User.name == user.name)).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User already exists")
     hashed_password = hash_password(user.password)
     user = User.model_validate(user, update={"hashed_password": hashed_password})
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+@router.post("/form", response_model=UserPublic)
+async def add_user_form(name: Annotated[str, Form()], password: Annotated[str, Form()], session: DBSessionDep):
+    existing_user = session.exec(select(User).where(User.name == name)).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User already exists")
+    hashed_password = hash_password(password)
+    user = User(name=name, hashed_password=hashed_password)
 
     session.add(user)
     session.commit()
