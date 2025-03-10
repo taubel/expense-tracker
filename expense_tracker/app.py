@@ -5,6 +5,7 @@ from typing import Annotated
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlmodel import select
@@ -91,11 +92,21 @@ async def login(
 ) -> Token:
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.name}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
 
 
 @app.get("/")
-async def root(user: Annotated[users.User, Depends(get_user_from_token)]):
+async def home_page(user: Annotated[users.User, Depends(get_user_from_token)]):
     return f"Hello {user.name}"
+
+
+@app.get("/login")
+async def login_page():
+    return FileResponse("static/login.html")
+
+
+@app.get("/signup")
+async def signup_page():
+    return FileResponse("static/signup.html")
