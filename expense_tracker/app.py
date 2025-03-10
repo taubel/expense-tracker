@@ -40,13 +40,16 @@ app.include_router(users.router, prefix="/api")
 
 
 def get_user_from_form(session: DBSessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> users.User:
+    authorization_exception = HTTPException(
+        status_code=401,
+        detail="Incorrect username or password",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     user = session.exec(select(users.User).where(users.User.name == form_data.username)).first()
     if not user:
-        raise HTTPException(status_code=401, detail="Incorrect username or password",
-                            headers={"WWW-Authenticate": "Bearer"})
+        raise authorization_exception
     if not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Incorrect username or password",
-                            headers={"WWW-Authenticate": "Bearer"})
+        raise authorization_exception
     return user
 
 
