@@ -4,9 +4,10 @@ from typing import Annotated
 
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlmodel import select
 
@@ -36,6 +37,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+templates = Jinja2Templates(directory="static")
 
 app.include_router(expenses.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
@@ -97,9 +99,14 @@ async def login(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@app.get("/")
-async def home_page(user: Annotated[users.User, Depends(get_user_from_token)]):
-    return f"Hello {user.name}"
+@app.get("/", response_class=HTMLResponse)
+async def home_page(request: Request, user: Annotated[users.User, Depends(get_user_from_token)], session: DBSessionDep):
+    user_expenses = session.exec(
+        select(expenses.Expense).where(expenses.Expense.id == user.id)
+    ).all()
+    return templates.TemplateResponse(
+        request=request, name="index.html", context=user_expenses
+    )
 
 
 @app.get("/login")
