@@ -1,4 +1,4 @@
-{% raw %}<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,7 +39,7 @@
         {% if expenses %}
             <ul>
                 {% for expense in expenses %}
-                    <li>Amount: ${{ expense.amount }}, Date: {{ expense.timestamp }}</li>
+                    <li>Amount: {{ expense.amount }}, Date: {{ expense.timestamp }}</li>
                 {% endfor %}
             </ul>
         {% else %}
@@ -47,4 +47,4 @@
         {% endif %}
     </div>
 </body>
-</html>{% endraw %}
+</html>

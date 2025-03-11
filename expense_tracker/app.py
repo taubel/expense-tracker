@@ -105,7 +105,7 @@ async def home_page(request: Request, user: Annotated[users.User, Depends(get_us
         select(expenses.Expense).where(expenses.Expense.user_id == user.id)
     ).all()
     return templates.TemplateResponse(
-        request=request, name="index.html", context=user_expenses
+        request=request, name="index.html", context={"expenses": user_expenses}
     )
 
 
