@@ -102,7 +102,7 @@ async def login(
 @app.get("/", response_class=HTMLResponse)
 async def home_page(request: Request, user: Annotated[users.User, Depends(get_user_from_token)], session: DBSessionDep):
     user_expenses = session.exec(
-        select(expenses.Expense).where(expenses.Expense.id == user.id)
+        select(expenses.Expense).where(expenses.Expense.user_id == user.id)
     ).all()
     return templates.TemplateResponse(
         request=request, name="index.html", context=user_expenses
